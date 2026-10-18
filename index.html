@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#080b17" />
+    <meta name="description" content="HOLO / DRAW：手機優先的 Hololive 名單分組抽籤台。匯入名單、隨機分組、確認並匯出備份。" />
+    <title>HOLO / DRAW — 星際分組抽籤台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+    <div class="star-grid" aria-hidden="true"></div>
+
+    <header class="site-header" id="top">
+      <a class="brand" href="#top" aria-label="HOLO DRAW 回到頂端">
+        <span class="brand-mark" aria-hidden="true">H<span>✦</span></span>
+        <span class="brand-word"><strong>HOLO</strong><small>/ DRAW</small></span>
+      </a>
+      <nav class="desktop-nav" aria-label="主要導覽">
+        <a href="#roster">01 名單</a>
+        <a href="#setup">02 設定</a>
+        <a href="#results">03 分組</a>
+        <a href="#backup">備份</a>
+      </nav>
+      <div class="header-status"><span class="status-dot"></span><span>LOCAL SAVE</span></div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-star">✦</span> HOLOVERSE · GROUP RANDOMIZER</p>
+          <h1 id="heroTitle">讓星光替你<br class="mobile-break" /><span>分組。</span></h1>
+          <p class="hero-description">匯入名單、鎖定分組、發射抽籤訊號。每一步都能在手機上完成。</p>
+        </div>
+        <div class="hero-station" aria-label="抽籤流程">
+          <span><b>01</b> 名單</span><i aria-hidden="true"></i><span><b>02</b> 抽籤</span><i aria-hidden="true"></i><span><b>03</b> 確認</span><i aria-hidden="true"></i><span><b>04</b> 備份</span>
+        </div>
+        <div class="hero-foot"><span><span class="pulse"></span> YOUR ROSTER STAYS ON THIS DEVICE</span><span class="hero-coordinate">35°41′N / RNG-01</span></div>
+      </section>
+
+      <section class="workspace" aria-label="抽籤工作區">
+        <section class="panel roster-panel" id="roster" aria-labelledby="rosterTitle">
+          <div class="panel-heading">
+            <div class="step-label"><span>01</span><span>ROSTER / 名單</span></div>
+            <span class="count-chip"><b id="rosterCount">0</b><span>位</span></span>
+          </div>
+          <h2 id="rosterTitle">匯入參與者</h2>
+          <p class="panel-description">每行一個名字；也能直接選取 TXT、CSV 或 JSON 備份。</p>
+
+          <label class="paste-label" for="pasteInput">貼上名單</label>
+          <textarea id="pasteInput" rows="4" placeholder="例如：&#10;星街彗星&#10;櫻巫女&#10;白上吹雪" spellcheck="false"></textarea>
+          <div class="import-actions">
+            <button class="button button-primary button-small" id="importTextButton" type="button"><span aria-hidden="true">＋</span> 匯入名單</button>
+            <label class="button button-quiet button-small file-button" id="fileButton" for="rosterFile">選擇檔案<input id="rosterFile" type="file" accept=".txt,.csv,.json,text/plain,text/csv,application/json" /></label>
+          </div>
+          <div class="manual-entry">
+            <label class="visually-hidden" for="manualName">新增一位成員</label>
+            <input id="manualName" type="text" maxlength="80" placeholder="新增一位成員…" autocomplete="off" />
+            <button class="button button-icon" id="addNameButton" type="button" aria-label="新增成員">＋</button>
+          </div>
+          <div class="roster-tools">
+            <label class="search-box"><span aria-hidden="true">⌕</span><span class="visually-hidden">搜尋名單</span><input id="searchInput" type="search" placeholder="搜尋名單…" autocomplete="off" /></label>
+            <button class="text-button" id="clearRosterButton" type="button">清空名單</button>
+          </div>
+          <div class="roster-list-wrap">
+            <ul class="roster-list" id="rosterList" aria-label="參與者名單"></ul>
+            <p class="empty-state roster-empty" id="rosterEmpty">名單還是空的。<br /><span>貼上名單，準備好第一道訊號。</span></p>
+          </div>
+          <div class="panel-footnote"><span class="tiny-star">✦</span><span id="rosterNote">名單只保存在這台裝置的瀏覽器。</span></div>
+        </section>
+
+        <section class="panel setup-panel" id="setup" aria-labelledby="setupTitle">
+          <div class="panel-heading">
+            <div class="step-label"><span>02</span><span>CONFIG / 設定</span></div>
+            <span class="settings-glyph" aria-hidden="true">⌘</span>
+          </div>
+          <h2 id="setupTitle">設定分組方式</h2>
+          <p class="panel-description">選擇組數或每組人數，剩餘名額會平均分配。</p>
+
+          <fieldset class="mode-fieldset">
+            <legend>依照什麼分組？</legend>
+            <div class="segmented-control" role="group" aria-label="分組模式">
+              <button class="segment-button is-active" id="modeCount" type="button" aria-pressed="true">指定組數</button>
+              <button class="segment-button" id="modeSize" type="button" aria-pressed="false">每組人數</button>
+            </div>
+          </fieldset>
+          <div class="setting-input-row">
+            <div><label id="groupValueLabel" for="groupValue">總組數</label><p class="setting-hint" id="settingHint">建立幾個小隊？</p></div>
+            <div class="number-control"><button id="decrementValue" type="button" aria-label="減少一組">−</button><input id="groupValue" type="number" min="2" max="100" value="3" inputmode="numeric" aria-describedby="settingHint" /><button id="incrementValue" type="button" aria-label="增加一組">＋</button></div>
+          </div>
+          <div class="group-preview" id="groupPreview" aria-live="polite"><span class="preview-orbit" aria-hidden="true">✦</span><span id="groupPreviewText">匯入名單後，這裡會顯示分組預覽。</span></div>
+          <div class="setting-note"><span aria-hidden="true">◇</span><span>抽籤前可重抽；確認後名單與設定會鎖定，避免結果被意外改動。</span></div>
+        </section>
+
+        <section class="panel draw-panel" id="draw" aria-labelledby="drawTitle">
+          <div class="panel-heading">
+            <div class="step-label"><span>03</span><span>RNG / DRAW</span></div>
+            <span class="live-chip"><span></span> READY</span>
+          </div>
+          <div class="draw-intro">
+            <div><p class="eyebrow">SIGNAL CONTROL DECK</p><h2 id="drawTitle">發射分組訊號</h2></div>
+            <span class="draw-symbol" aria-hidden="true">✳</span>
+          </div>
+          <p class="draw-description" id="drawDescription">名單就緒後，按下按鈕開始隨機分組。</p>
+          <div class="draw-actions">
+            <button class="button button-primary draw-button" id="drawButton" type="button" disabled><span class="button-star" aria-hidden="true">✦</span><span><strong>開始抽籤</strong><small>SHUFFLE / START</small></span><span class="button-arrow" aria-hidden="true">↗</span></button>
+            <button class="button button-outline reroll-button" id="rerollButton" type="button" disabled><span aria-hidden="true">↻</span> 重抽</button>
+          </div>
+          <div class="draw-status" id="appStatus" role="status" aria-live="polite"><span class="status-dash"></span><span>等待名單輸入</span></div>
+        </section>
+
+        <section class="panel results-panel" id="results" aria-labelledby="resultsTitle">
+          <div class="panel-heading">
+            <div class="step-label"><span>04</span><span>RESULT / 分組</span></div>
+            <span class="result-state" id="resultState">尚未抽籤</span>
+          </div>
+          <div class="results-title-row"><div><h2 id="resultsTitle">分組結果</h2><p class="panel-description" id="resultsDescription">每一個名字，都會找到自己的隊伍。</p></div><span class="result-spark" aria-hidden="true">✦</span></div>
+          <div class="groups-grid" id="groupsGrid" aria-live="polite"><div class="groups-placeholder"><span aria-hidden="true">◌</span><p>分組結果將在這裡展開</p><small>匯入名單後啟動抽籤</small></div></div>
+          <div class="confirm-actions">
+            <button class="button button-confirm" id="confirmGroupsButton" type="button" disabled><span aria-hidden="true">✓</span> 確認分組</button>
+            <button class="button button-quiet restart-button" id="restartButton" type="button" hidden>解除確認並重抽</button>
+          </div>
+        </section>
+
+        <section class="panel backup-panel" id="backup" aria-labelledby="backupTitle">
+          <div class="panel-heading">
+            <div class="step-label"><span>05</span><span>ARCHIVE / 備份</span></div>
+            <span class="archive-icon" aria-hidden="true">⤓</span>
+          </div>
+          <h2 id="backupTitle">把星圖帶走</h2>
+          <p class="panel-description">備份可還原名單、設定與已確認分組；CSV 方便分享結果。</p>
+          <div class="backup-actions">
+            <button class="button button-primary" id="exportJsonButton" type="button" disabled><span aria-hidden="true">↓</span> 匯出完整備份 JSON</button>
+            <button class="button button-outline" id="exportCsvButton" type="button" disabled><span aria-hidden="true">▤</span> 匯出 CSV 分組表</button>
+            <button class="button button-quiet" id="copyResultsButton" type="button" disabled><span aria-hidden="true">▣</span> 複製名單／分組結果</button>
+            <label class="button button-quiet file-button restore-button" id="restoreButton" for="backupFile"><span aria-hidden="true">↥</span> 匯入 JSON 備份<input id="backupFile" type="file" accept=".json,application/json" /></label>
+          </div>
+          <p class="backup-note"><span class="pulse"></span> 自動保存已啟用 <span class="backup-separator">·</span> 僅限本機瀏覽器</p>
+        </section>
+
+        <section class="panel history-panel" id="history" aria-labelledby="historyTitle">
+          <div class="panel-heading">
+            <div class="step-label"><span>06</span><span>LOG / HISTORY</span></div>
+            <span class="history-count" id="historyCount">0 筆</span>
+          </div>
+          <h2 id="historyTitle">已確認紀錄</h2>
+          <p class="panel-description">確認過的分組會保存在這裡，並納入 JSON 備份。</p>
+          <ol class="history-list" id="historyList"><li class="history-empty">目前還沒有已確認的分組。</li></ol>
+        </section>
+      </section>
+
+      <p class="page-signoff"><span>H★</span> HOLO / DRAW <i aria-hidden="true"></i> FAIR PLAY, COSMIC WAY</p>
+    </main>
+
+    <nav class="mobile-dock" aria-label="手機快速導覽">
+      <a href="#roster"><span>01</span>名單</a>
+      <a href="#setup"><span>02</span>設定</a>
+      <a href="#draw"><span>03</span>抽籤</a>
+      <a href="#backup"><span>04</span>備份</a>
+    </nav>
+
+    <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="dialogTitle" aria-describedby="dialogMessage">
+      <div class="dialog-topline"><span class="dialog-orbit" aria-hidden="true">✦</span><span>CONFIRM / SYSTEM CHECK</span><button class="dialog-close" id="dialogCloseButton" type="button" aria-label="關閉">×</button></div>
+      <h2 id="dialogTitle">確認分組</h2>
+      <p id="dialogMessage">確認後將保存分組結果，並鎖定名單與設定。</p>
+      <div class="dialog-summary" id="dialogSummary"></div>
+      <div class="dialog-actions"><button class="button button-quiet" id="dialogCancelButton" type="button">再看一下</button><button class="button button-primary" id="dialogConfirmButton" type="button">確認執行</button></div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
