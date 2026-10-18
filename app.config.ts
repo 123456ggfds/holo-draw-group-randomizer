@@ -1,3 +1,3 @@
 export default {
-  logoUrl: "https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/hololive.svg",
+  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663787098519/dErLdkbEVuHYzsJj.svg",
 };
